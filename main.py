@@ -43,6 +43,8 @@ class LabelTool():
         self.scale=1
         self.tkimg = None
         self.currentLabelclass = ''
+        self.currentLabelID = 0
+        self.classes = 0
         self.cla_can_temp = []
         self.classcandidate_filename = 'classes.txt'
 
@@ -73,9 +75,11 @@ class LabelTool():
         self.mainPanel.bind("<Motion>", self.mouseMove)
         self.mainPanel.bind("<Button-3>", self.setclearall)
         self.parent.bind("<Escape>", self.cancelBBox)  # press <Espace> to cancel current bbox
-        self.parent.bind("s", self.cancelBBox)
+        self.parent.bind("q", self.cancelBBox)
         self.parent.bind("a", self.prevImage) # press 'a' to go backforward
         self.parent.bind("d", self.nextImage) # press 'd' to go forward
+        self.parent.bind("w", self.prevClass) # press 'a' to go backforward
+        self.parent.bind("s", self.nextClass) # press 'd' to go forward
         self.mainPanel.grid(row = 1, column = 1, rowspan = 4, sticky = W+N)
         # with Windows OS
         self.parent.bind("<MouseWheel>", self.mouse_wheel)
@@ -93,8 +97,9 @@ class LabelTool():
         			# print line
         			self.cla_can_temp.append(line.strip('\n'))
         #print self.cla_can_temp
+        self.classes = len(self.cla_can_temp)
         self.classcandidate['values'] = self.cla_can_temp
-        self.classcandidate.current(0)
+        self.classcandidate.current(self.currentLabelID)
         self.currentLabelclass = self.classcandidate.get() #init
         self.btnclass = Button(self.frame, text = 'Confirm Class', command = self.setClass)
         self.btnclass.grid(row=2,column=2,sticky = W+E)
@@ -325,7 +330,23 @@ class LabelTool():
         if self.cur < self.total:
             self.cur += 1
             self.loadImage()
+            
+    def prevClass(self, event = None):
+        self.saveImage()
+        if self.currentLabelID > 0:
+            self.currentLabelID -= 1
+            self.classcandidate.current(self.currentLabelID)
+            self.currentLabelclass = self.classcandidate.get()
+            print('set label class to :',self.currentLabelclass)
 
+    def nextClass(self, event = None):
+        self.saveImage()
+        if self.currentLabelID < self.classes:
+            self.currentLabelID += 1
+            self.classcandidate.current(self.currentLabelID)
+            self.currentLabelclass = self.classcandidate.get()
+            print('set label class to :',self.currentLabelclass)
+            
     def gotoImage(self):
         idx = int(self.idxEntry.get())
         if 1 <= idx and idx <= self.total:
